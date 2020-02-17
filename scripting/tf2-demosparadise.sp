@@ -7,7 +7,7 @@
 //Defines
 #define PLUGIN_NAME "[TF2] Demos Paradise"
 #define PLUGIN_DESCRIPTION "DemoMan's wet dream in a gamemode."
-#define PLUGIN_VERSION "1.0.2"
+#define PLUGIN_VERSION "1.0.3"
 
 /*****************************/
 //Includes
@@ -365,15 +365,69 @@ public void TF2_OnPlayerSpawn(int client, int team, int class)
 	TF2Attrib_ApplyMoveSpeedBonus(client, 0.5);
 	TF2Attrib_SetByName_Weapons(client, -1, "fire rate bonus", 0.5);
 
+	SetClassAttributes(client, view_as<TFClassType>(class));
+
 	if (!IsFakeClient(client))
-		CreateTimer(0.1, Frame_Test, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.1, Timer_SpawnDelay, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 }
 
-public Action Frame_Test(Handle timer, any data)
+public Action Timer_SpawnDelay(Handle timer, any data)
 {
 	int client;
 	if ((client = GetClientOfUserId(data)) > 0 && IsClientInGame(client) && IsPlayerAlive(client))
 		g_Mayhem[client].UpdateHud();
+}
+
+public void TF2_OnClassChangePost(int client, TFClassType class)
+{
+	SetClassAttributes(client, class);
+}
+
+void SetClassAttributes(int client, TFClassType class)
+{
+	switch (class)
+	{
+		case TFClass_Scout:
+		{
+			TF2Attrib_SetByName(client, "air dash count", 1.0);
+		}
+		case TFClass_Soldier:
+		{
+			TF2Attrib_SetByName(client, "rocket jump damage reduction", 0.25);
+		}
+		case TFClass_Pyro:
+		{
+			TF2Attrib_SetByName(client, "airblast cost decreased", 0.25);
+			TF2Attrib_SetByName(client, "airblast pushback scale", 1.50);
+		}
+		case TFClass_DemoMan:
+		{
+			TF2Attrib_SetByName(client, "Projectile speed increased", 1.25);
+		}
+		case TFClass_Heavy:
+		{
+			TF2Attrib_SetByName(client, "minigun spinup time decreased", 0.25);
+		}
+		case TFClass_Engineer:
+		{
+			TF2Attrib_SetByName(client, "build rate bonus", 0.25);
+		}
+		case TFClass_Medic:
+		{
+			TF2Attrib_SetByName(client, "ubercharge rate bonus", 8.0);
+			TF2Attrib_SetByName(client, "uber duration bonus", 5.0);
+		}
+		case TFClass_Sniper:
+		{
+			TF2Attrib_SetByName(client, "sniper charge per sec", 2.0);
+			TF2Attrib_SetByName(client, "SRifle Charge rate increased", 2.0);
+			TF2Attrib_SetByName(client, "mult sniper charge after headshot", 2.0);
+		}
+		case TFClass_Spy:
+		{
+			TF2Attrib_SetByName(client, "cloak consume rate decreased", 0.01);
+		}
+	}
 }
 
 public Action GetMaxHealth(int entity, int& maxhealth)
