@@ -7,7 +7,7 @@
 //Defines
 #define PLUGIN_NAME "[TF2] Demos Paradise"
 #define PLUGIN_DESCRIPTION "DemoMan's wet dream in a gamemode."
-#define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_VERSION "1.0.1"
 
 /*****************************/
 //Includes
@@ -36,6 +36,7 @@ enum
 
 int g_Mutation = Mutation_None;
 TFClassType g_Class[MAXPLAYERS + 1];
+bool g_SkipMutation;
 
 Handle g_MayhemHud;
 
@@ -192,8 +193,18 @@ public Action Command_Mutation(int client, int args)
 
 public Action Timer_Mutation(Handle timer)
 {
+	if (g_SkipMutation)
+	{
+		g_SkipMutation = false;
+		return Plugin_Continue;
+	}
+
+	g_SkipMutation = view_as<bool>(GetRandomFloat(0.0, 100.0) > 75.0);
+
 	g_Mutation = GetRandomInt(0, Mutation_Total);
 	ExecuteMutation();
+
+	return Plugin_Continue;
 }
 
 void ExecuteMutation()
