@@ -7,7 +7,7 @@
 //Defines
 #define PLUGIN_NAME "[TF2] Demos Paradise"
 #define PLUGIN_DESCRIPTION "DemoMan's wet dream in a gamemode."
-#define PLUGIN_VERSION "1.0.1"
+#define PLUGIN_VERSION "1.0.2"
 
 /*****************************/
 //Includes
@@ -362,10 +362,18 @@ public int MenuAction_Void(Menu menu, MenuAction action, int param1, int param2)
 
 public void TF2_OnPlayerSpawn(int client, int team, int class)
 {
-	g_Mayhem[client].UpdateHud();
-
 	TF2Attrib_ApplyMoveSpeedBonus(client, 0.5);
 	TF2Attrib_SetByName_Weapons(client, -1, "fire rate bonus", 0.5);
+
+	if (!IsFakeClient(client))
+		CreateTimer(0.1, Frame_Test, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action Frame_Test(Handle timer, any data)
+{
+	int client;
+	if ((client = GetClientOfUserId(data)) > 0 && IsClientInGame(client) && IsPlayerAlive(client))
+		g_Mayhem[client].UpdateHud();
 }
 
 public Action GetMaxHealth(int entity, int& maxhealth)
@@ -382,7 +390,8 @@ public Action Command_Mayhem(int client, int args)
 
 public void TF2_OnPlayerDeath(int client, int attacker, int assister, int inflictor, int damagebits, int stun_flags, int death_flags, int customkill)
 {
-	g_Mayhem[attacker].AddPoints(GetRandomInt(4, 6));
+	if (client != attacker)
+		g_Mayhem[attacker].AddPoints(GetRandomInt(4, 6));
 }
 
 public void TF2_OnControlPointCaptured(int index, char[] name, int cappingteam, char[] cappers)
